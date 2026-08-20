@@ -53,6 +53,7 @@
   const KEYMAP = {
     KeyW: 'fwd', ArrowUp: 'fwd', KeyS: 'back', ArrowDown: 'back',
     KeyA: 'left', KeyD: 'right', ShiftLeft: 'sprint', ShiftRight: 'sprint',
+    ArrowLeft: 'turnL', ArrowRight: 'turnR',
   };
 
   function bindInput() {
@@ -63,13 +64,17 @@
       if (document.pointerLockElement !== c && c.requestPointerLock) c.requestPointerLock();
     });
     document.addEventListener('mousemove', (e) => {
-      if (App.scene !== 'raid' || !App.raid || App.raid.over) return;
-      if (document.pointerLockElement !== App.canvas) return;
-      App.raid.player.ang += e.movementX * App.sens * (App.raid.player.ads ? 0.55 : 1);
+      if (App.scene !== 'raid' || !App.raid || App.raid.over || App.paused) return;
+      const locked = document.pointerLockElement === App.canvas;
+      // where pointer lock is refused (some embeds), dragging looks around
+      if (!locked && !(e.buttons & 1)) return;
+      if (!locked && App.input.looting) return;
+      const dx = e.movementX || 0;
+      App.raid.player.ang += dx * App.sens * (App.raid.player.ads ? 0.55 : 1) * (locked ? 1 : 1.6);
     });
     document.addEventListener('mousedown', (e) => {
-      if (App.scene !== 'raid' || App.paused) return;
-      if (document.pointerLockElement !== App.canvas) return;
+      if (App.scene !== 'raid' || App.paused || App.input.looting) return;
+      if (e.target !== App.canvas && document.pointerLockElement !== App.canvas) return;
       if (e.button === 0) App.input.fire = true;
       if (e.button === 2) App.input.ads = true;
     });
@@ -108,10 +113,13 @@
       if (e.code === 'KeyE') App.input.use = false;
     });
     document.addEventListener('pointerlockchange', () => {
-      if (App.scene === 'raid' && document.pointerLockElement !== App.canvas &&
-          !App.input.looting && !App.paused && App.raid && !App.raid.over) {
+      if (document.pointerLockElement === App.canvas) { App.hadLock = true; return; }
+      if (App.hadLock && App.scene === 'raid' && !App.input.looting && !App.paused &&
+          App.raid && !App.raid.over) {
+        App.hadLock = false;
         togglePause(true);
       }
+      App.hadLock = false;
     });
   }
 
@@ -130,6 +138,7 @@
         '<div><b>RMB</b> aim</div><div><b>R</b> reload</div>' +
         '<div><b>E</b> interact / hold to search</div><div><b>F</b> use medical</div>' +
         '<div><b>1 / 2</b> primary / sidearm</div><div><b>M</b> scanner</div>' +
+        '<div><b>&larr; &rarr;</b> turn (if the mouse is not captured)</div><div><b>DRAG</b> look</div>' +
         '</div>' +
         '<button class="wide go" data-resume="1">RESUME</button>' +
         '<button class="wide bad" data-abandonraid="1">ABANDON RAID (LOSE KIT)</button></div>';
@@ -350,7 +359,13 @@
     if (App.scene !== 'raid' || !App.raid) return;
     const raid = App.raid;
 
-    if (!raid.over && !App.paused) IV.Sim.update(raid, App.input, dt);
+    if (!raid.over && !App.paused) {
+      if (!App.input.looting) {
+        const turn = (App.input.turnR ? 1 : 0) - (App.input.turnL ? 1 : 0);
+        if (turn) raid.player.ang += turn * 2.1 * dt * (raid.player.ads ? 0.55 : 1);
+      }
+      IV.Sim.update(raid, App.input, dt);
+    }
     if (raid.over && !raid.summarised) { raid.summarised = true; finishRaid(raid); }
 
     const p = raid.player;

@@ -20,3 +20,15 @@ fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
 const dest = path.join(root, 'dist', 'ironvoid.html');
 fs.writeFileSync(dest, out);
 console.log('wrote ' + path.relative(process.cwd(), dest) + '  (' + (out.length / 1024).toFixed(1) + ' KB, ' + files.length + ' modules)');
+
+// Second output: body content only, for hosts that supply their own document
+// skeleton (the Artifact viewer wraps the file in doctype/head/body itself).
+const style = out.slice(out.indexOf('<style>'), out.indexOf('</style>') + 8);
+const body = out.slice(out.indexOf('<body'), out.lastIndexOf('</body>'));
+const inner = body.slice(body.indexOf('>') + 1);
+const embed = '<title>IRONVOID</title>\n' + style +
+  '\n<style>html,body{margin:0;padding:0;background:#0b0e11}</style>\n' +
+  '<script>document.body.dataset.scene="meta";</script>\n' + inner;
+const dest2 = path.join(root, 'dist', 'ironvoid.embed.html');
+fs.writeFileSync(dest2, embed);
+console.log('wrote ' + path.relative(process.cwd(), dest2) + '  (' + (embed.length / 1024).toFixed(1) + ' KB)');

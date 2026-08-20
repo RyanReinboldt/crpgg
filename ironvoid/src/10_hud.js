@@ -42,7 +42,7 @@
     const reloadDip = p.reloadT > 0 ? Math.sin((1 - p.reloadT / wd.reload) * Math.PI) * 90 * s : 0;
     const useDip = p.useT > 0 ? 120 * s : 0;
     const ads = p.ads ? 1 : 0;
-    const cx = W * (0.72 - 0.22 * ads) + bobX * (1 - ads * 0.8);
+    const cx = W * (0.66 - 0.16 * ads) + bobX * (1 - ads * 0.8);
     const cy = H - 10 + bobY + reloadDip + useDip + p.recoil * 260 * s;
 
     g.save();
@@ -155,14 +155,19 @@
       const wd = p.active ? IV.def(p[p.active].id) : null;
       const spread = wd ? wd.spread * (p.ads ? 0.42 : 1) * (p.sprinting ? 1.9 : 1) * (1 + p.recoil * 4) : 0.03;
       const rad = 6 + spread * H * 0.9;
-      g.strokeStyle = 'rgba(232,228,218,0.75)';
-      g.lineWidth = 1.5;
-      for (const a of [0, Math.PI / 2, Math.PI, -Math.PI / 2]) {
-        g.beginPath();
-        g.moveTo(W / 2 + Math.cos(a) * rad, H / 2 + Math.sin(a) * rad);
-        g.lineTo(W / 2 + Math.cos(a) * (rad + 6), H / 2 + Math.sin(a) * (rad + 6));
-        g.stroke();
+      // drawn twice: a dark backing so the reticle survives a bright wall
+      for (const pass of [0, 1]) {
+        g.strokeStyle = pass ? 'rgba(240,238,230,0.92)' : 'rgba(0,0,0,0.55)';
+        g.lineWidth = pass ? 1.5 : 3.5;
+        for (const a of [0, Math.PI / 2, Math.PI, -Math.PI / 2]) {
+          g.beginPath();
+          g.moveTo(W / 2 + Math.cos(a) * rad, H / 2 + Math.sin(a) * rad);
+          g.lineTo(W / 2 + Math.cos(a) * (rad + 7), H / 2 + Math.sin(a) * (rad + 7));
+          g.stroke();
+        }
       }
+      g.fillStyle = 'rgba(240,238,230,0.75)';
+      g.fillRect(W / 2 - 1, H / 2 - 1, 2, 2);
       if (p.hitMark > 0) {
         g.strokeStyle = 'rgba(255,110,80,' + Math.min(1, p.hitMark * 4) + ')';
         g.lineWidth = 2;
