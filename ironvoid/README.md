@@ -12,7 +12,9 @@ sprite and sound effect is generated in code at boot.
 **Original work.** Nothing here is taken from Marauders — no assets, no names,
 no code. What is reused is the genre, which is not anyone's property. See
 [`docs/REVIVAL.md`](docs/REVIVAL.md) for the reasoning, the legal line, and what
-building a real successor would actually take.
+building a real successor would actually take, and
+[`docs/PRIOR-ART.md`](docs/PRIOR-ART.md) for the open-source landscape — what
+can be forked, what can only be read, and which licences are traps.
 
 ## Play
 

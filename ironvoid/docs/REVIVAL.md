@@ -173,6 +173,12 @@ server authority, ragdolls/animation, vertical aim and level geometry beyond a
 grid, pathfinding (hostiles currently steer directly and slide along walls),
 and a real audio bed.
 
+If you would rather stand on someone else's code than start from this one,
+[`PRIOR-ART.md`](PRIOR-ART.md) surveys what open source actually offers the
+genre — one MIT-licensed Godot extraction prototype worth reading, a permissive
+Tarkov server emulator worth studying and not shipping, a STALKER engine whose
+licence is a trap, and the backend stack that saves you the year that matters.
+
 Play it, then read `ironvoid/README.md` for how it is put together. The point of
 a prototype is to answer one question — *is the loop fun before any of the
 expensive parts exist?* — cheaply enough that a "no" costs you a weekend.
